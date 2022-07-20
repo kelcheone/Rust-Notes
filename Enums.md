@@ -132,3 +132,138 @@ Rust can infer the types of `some_number` and `some_string` automaticaly because
 
 When we have a `Some` value we know that the value is present and is held by the `Some` variant.
 When we have the `None` value, in some sense it means the same thing as null; we have an invalid value.
+
+## The match controll flow
+
+**Match** allows to compare a value against a series of patterns and then execute code based on what pattern it matches.
+Match can be likened to a coin-sorting machine such that the coin falls into the first hole it fits into. Using the coin analogy:
+
+```Rust
+enum Coin{
+    Penny,
+    Nickel,
+    Dime,
+    Quater,
+}
+
+fn value_in_cents(coin: Coin) -> u8{
+    match coin{
+        Coin::Penny => 1,
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quater => 25,
+    }
+}
+```
+
+To break it down:
+
+> In the `value_in_cents` function we declare `match` followed by and expression `coin`; just like in `if` statements with the difference being `if` statements need to return Boolean values but `match` can go with any type.
+> Next are the `match` arms. Arm is comprised of two parts which are: the first part which contains the pattern which is the value; `Coin::Penny` and the `=>` operator which separates the pattern and the code to run; in this case return `1`.
+> The code associated in each arm is an expresion and the resulting value from the expresion is returned as the value for the whole match expression.
+
+### Patterns that match values
+
+Match can bind to the parts of the values that match the pattern; for instance:
+
+```Rust
+enum UsState{
+    Alabama,
+    Alaska,
+}
+
+enum Coin{
+    Penny,
+    Nickel,
+    Dime,
+    Quater(UsState),
+}
+```
+
+The `Quater` variant includes a UsState value stored in it
+In a match expresion for this enum we add a `state` variable that matches the values of variant `Coin::Quater`. When a `Coin::Quater` matches, the state variable will bind to the value of that quater's state. We can then use `state` in the code of that arm.
+I.e.
+
+```Rust
+fn value_in_cents(coin::Coin) ->u8{
+    match coin{
+        Coin::Penny => 1,
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin:Quater(state) =>{
+            Println!("State Quater from {:?}", state);
+            1
+        }
+    }
+}
+```
+
+we can call this by:
+
+```Rust
+value_in_cents(Coin::Quater(UsState::Alaska));
+```
+
+### Matching with Option\<T>
+
+We can use `match` to handle `T` in the `Some` variant. I.e.
+
+```Rust
+fn plus_one(x: Option<i32>) -> Option<i32>{
+    match x {
+        None => None,
+        Some(i) => Some(i + 1),
+    }
+}
+
+let five = Some(5);
+let six = plus_one(five);
+let none = plus_one(None);
+
+```
+
+Here when we pass `plus_one` with `five` it checks if it has a match, in the first arm it finds no match so it moves to the second arm `Some(i)...` and finds a match. The `i` binds to the value contained in `Some` so `i` takes the value `5`. The code in the match arm is executed; 1 is added to the given value.
+In tge secod instance `none` it checks the arm and matches the `None` arm so the code executed will be `None`.
+
+### Matches are exhausive
+
+The are exhausive in a way that we must handle all the cases in a given pattern. The Rust compiler would result in errors if we don't handle all cases.
+
+### Catch-all Patterns and the \_placeholder
+
+Using enums we can take actions for a few particular values and also for all values that tale the default action. I.e.
+
+```Rust
+let dice_roll = 9;
+match dice_roll{
+    3 => add_fancy_hat(),
+    7 => remove_fancy_hat(),
+    other => move_player(other),
+}
+
+fn add_fancy_hat() {}
+fn remove_fancy_hat() {}
+fn move_palyer(num_spaces: u8) {}
+```
+
+The first two arms cover the `3` and `7` values. The last arm covers every other possible values, the pattern uses a varible we have choosen to name `other`. The code that runs in the `other` uses the variable by passing it to the `move_player` function.
+The code compiles, even though we haven't listed any values a `u8` will have, because the last pattern will match all values no specified.
+The catch-all pattern meets the requirements that a `match` must be exhausive.
+A catch-all arm should be put as the last arm in a match since patterns are evaluated in order.
+
+When we don't want to use a value in a catch-all pattern we use: `_`, which is a special pattern that matches any value and does not bind to that value.
+
+```Rust
+let dice_roll = 9;
+match dice_roll{
+    3 => add_fancy_hat(),
+    7 => remove_fancy_hat(),
+    _ => reroll(),
+}
+
+fn add_fancy_hat() {}
+fn remove_fancy_hat() {}
+fn reroll() {}
+```
+
+or `_ => (),` if we want nothing to occur if we fail to pass first and second arms.

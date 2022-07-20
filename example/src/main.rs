@@ -25,6 +25,16 @@ fn main() {
     if rect.width() {
         println!("The rectangle has a nonzero width of {} ", rect.width)
     }
+    value_in_cents(Coin::Quarter(UsStates::Alaska));
+
+    println!("five {:?}", plus_one(Some(5)));
+    println!("None {:?}", plus_one(None));
+
+    let config_max = Some(5);
+    match config_max {
+        Some(max) => println!("The max Config is {}", max),
+        _ => (),
+    }
 }
 
 fn calc_len(s: &mut String) {
@@ -71,5 +81,38 @@ impl Rectangle {
     }
     fn width(&self) -> bool {
         self.width > 0
+    }
+}
+
+#[derive(Debug)]
+enum UsStates {
+    Alabama,
+    Alaska,
+    Arizona,
+}
+
+enum Coin {
+    Penny,
+    Nickel,
+    Dime,
+    Quarter(UsStates),
+}
+
+fn value_in_cents(coin: Coin) -> u32 {
+    match coin {
+        Coin::Penny => 1,
+        Coin::Nickel => 5,
+        Coin::Dime => 10,
+        Coin::Quarter(state) => {
+            println!("State: {:?}", state);
+            25
+        }
+    }
+}
+
+fn plus_one(x: Option<i32>) -> Option<i32> {
+    match x {
+        None => None,
+        Some(i) => Some(i + 1),
     }
 }
